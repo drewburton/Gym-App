@@ -1,0 +1,66 @@
+plan_id: phase-3-2026-03-03
+project_name: WorkoutTracker
+phase: "Phase 3: Active Workout + Timer"
+status: completed
+focus_areas:
+  - Workout Initialization
+  - Active Workout Execution
+  - Workout Set Entry
+  - Rest Timer Logic
+  - Background Support
+  - Progress Monitoring
+
+tasks:
+  - id: 3.1.1
+    name: Create QuickWorkoutViewController
+    description: Exercise selection for ad-hoc workouts.
+    status: completed
+    dependencies: []
+
+  - id: 3.1.2
+    name: Create ActiveWorkoutViewController
+    description: Main workout execution screen with set tracking.
+    status: completed
+    dependencies: [3.1.1]
+
+  - id: 3.1.3
+    name: Implement Workout Set Entry UI
+    description: Custom input for weight and reps with quick actions.
+    status: completed
+    dependencies: [3.1.2]
+
+  - id: 3.2.1
+    name: Create TimerService
+    description: Singleton for rest timer management.
+    status: completed
+    dependencies: []
+
+  - id: 3.2.2
+    name: Create NotificationService
+    description: Local notifications for timer completion.
+    status: completed
+    dependencies: [3.2.1]
+
+  - id: 3.2.3
+    name: Implement Siri Voice Announcements
+    description: Voice feedback for timer and transitions.
+    status: completed
+    dependencies: [3.2.2]
+
+  - id: 3.2.4
+    name: Configure Background Modes
+    description: Handle timer and workout state in background.
+    status: completed
+    dependencies: [3.2.1]
+
+  - id: 3.3.1
+    name: Implement Last Workout History Lookup
+    description: Display previous weight/reps for progressive overload.
+    status: completed
+    dependencies: [3.1.2]
+
+  - id: 3.3.2
+    name: Implement Auto-Populate Logic
+    description: Pre-fill fields with last used values.
+    status: completed
+    dependencies: [3.3.1]

@@ -1,0 +1,82 @@
+plan_id: phase-2-2026-03-27
+project_name: WorkoutTracker
+phase: "Phase 2: iPhone Core UI"
+status: completed
+focus_areas:
+  - Navigation
+  - Home Screen
+  - Exercises List
+  - Templates Management
+
+tasks:
+  - id: 2.1.1
+    name: Create MainTabBarController
+    description: Create MainTabBarController extending UITabBarController and configure 4 tabs with SF Symbols.
+    status: completed
+    dependencies: []
+
+  - id: 2.1.2
+    name: Configure Navigation Controllers
+    description: Embed each tab in a UINavigationController with appropriate appearance.
+    status: completed
+    dependencies: [2.1.1]
+
+  - id: 2.2.1
+    name: Create HomeViewController
+    description: Design home screen layout with SnapKit, "Start Workout" button, and template cards.
+    status: completed
+    dependencies: [2.1.2]
+
+  - id: 2.2.2
+    name: Create TemplateCardView
+    description: Design reusable template card component with visual indicators for muscle groups.
+    status: completed
+    dependencies: [2.2.1]
+
+  - id: 2.3.1
+    name: Create ExercisesListViewController
+    description: Set up table view for exercises with muscle group sections and custom cells.
+    status: completed
+    dependencies: [2.1.2]
+
+  - id: 2.3.2
+    name: Implement Search and Filter for Exercises
+    description: Add search controller and muscle group/equipment type filters to the exercises list.
+    status: completed
+    dependencies: [2.3.1]
+
+  - id: 2.3.3
+    name: Create ExerciseEditorViewController
+    description: Form for creating and editing exercises with muscle group and equipment pickers.
+    status: completed
+    dependencies: [2.3.1]
+
+  - id: 2.4.1
+    name: Create TemplatesListViewController
+    description: List of workout templates with swipe actions and reordering.
+    status: completed
+    dependencies: [2.1.2]
+
+  - id: 2.4.2
+    name: Create TemplateEditorViewController
+    description: Form for editing workout templates, including exercise selection and reordering.
+    status: completed
+    dependencies: [2.4.1, 2.4.3]
+
+  - id: 2.4.3
+    name: Create ExercisePickerViewController
+    description: Multi-select searchable list of exercises for template creation.
+    status: completed
+    dependencies: [2.3.1]
+
+  - id: 2.5.1
+    name: Implement Navigation Coordinators
+    description: Create AppCoordinator and TabBarCoordinators for better flow management.
+    status: completed
+    dependencies: [2.1.2, 2.2.1, 2.3.1, 2.4.1]
+
+  - id: 2.5.2
+    name: Configure App Shortcuts
+    description: Add quick actions like "Start Workout" and "Last Workout" to Info.plist.
+    status: completed
+    dependencies: [2.5.1]

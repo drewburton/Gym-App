@@ -1,0 +1,47 @@
+plan_id: phase-5-2026-03-03
+project_name: WorkoutTracker
+phase: "Phase 5: Apple Watch Companion"
+status: in_progress
+focus_areas:
+  - Watch Connectivity
+  - Watch Workout UI
+  - Digital Crown Integration
+  - Watch Exercise List
+  - Real-time Data Sync
+
+tasks:
+  - id: 5.1.1
+    name: Create WatchConnectivityService
+    description: Implement WCSession delegate handling for cross-device communication.
+    status: todo
+    dependencies: []
+
+  - id: 5.1.2
+    name: Implement Data Sync
+    description: Sync workout templates, exercise database, and active state between iPhone and Watch.
+    status: todo
+    dependencies: [5.1.1]
+
+  - id: 5.2.1
+    name: Create Watch Workout Interface
+    description: Main watch workout screen with set tracking and rest timer.
+    status: todo
+    dependencies: [5.1.2]
+
+  - id: 5.2.2
+    name: Implement Digital Crown Integration
+    description: Map Digital Crown to weight and rep adjustments with haptic feedback.
+    status: todo
+    dependencies: [5.2.1]
+
+  - id: 5.2.3
+    name: Create Watch Exercise List
+    description: Scrolling list of available exercises on the watch.
+    status: todo
+    dependencies: [5.1.2]
+
+  - id: 5.3.1
+    name: Implement Watch Notifications
+    description: Rest timer notifications mirrored to Apple Watch with actions.
+    status: todo
+    dependencies: [5.1.1]

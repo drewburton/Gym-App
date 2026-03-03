@@ -1,0 +1,47 @@
+plan_id: phase-4-2026-03-03
+project_name: WorkoutTracker
+phase: "Phase 4: History + PR Tracking"
+status: completed
+focus_areas:
+  - Workout History List
+  - Workout Details View
+  - Personal Record Detection
+  - PR Display UI
+  - Workout Deletion
+
+tasks:
+  - id: 4.1.1
+    name: Create HistoryListViewController
+    description: Detailed workout history with section headers and search.
+    status: completed
+    dependencies: []
+
+  - id: 4.1.2
+    name: Create WorkoutDetailViewController
+    description: Full breakdown of a completed workout including sets and volume.
+    status: completed
+    dependencies: [4.1.1]
+
+  - id: 4.2.1
+    name: Implement PR Detection Logic
+    description: Compare finished sets against historical maximums to detect PRs.
+    status: completed
+    dependencies: [4.1.2]
+
+  - id: 4.2.2
+    name: Create PR Display UI
+    description: Visual indicators for PRs in history and active workout views.
+    status: completed
+    dependencies: [4.2.1]
+
+  - id: 4.2.3
+    name: Implement PR Celebration
+    description: UI effects and alerts when a new PR is achieved.
+    status: completed
+    dependencies: [4.2.2]
+
+  - id: 4.3.1
+    name: Implement Delete Workout
+    description: Support for deleting workouts with soft/hard options.
+    status: completed
+    dependencies: [4.1.1]

@@ -1,0 +1,38 @@
+import UIKit
+
+@main
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        // Initialize database and seed data
+        _ = DatabaseService.shared
+        DatabaseService.shared.seedDatabaseIfNeeded()
+        
+        NotificationService.shared.requestAuthorization()
+        
+        // Initialize Watch Connectivity
+        _ = WatchConnectivityService.shared
+        
+        return true
+    }
+
+    func application(
+        _ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions
+    ) -> UISceneConfiguration {
+        return UISceneConfiguration(
+            name: "Default Configuration",
+            sessionRole: connectingSceneSession.role
+        )
+    }
+
+    func application(
+        _ application: UIApplication,
+        didDiscardSceneSessions sceneSessions: Set<UISceneSession>
+    ) {
+    }
+}
