@@ -14,7 +14,6 @@ final class DatabaseService {
     private let workouts = Table("workouts")
     private let workoutExercises = Table("workout_exercises")
     private let workoutSets = Table("workout_sets")
-    private let activeWorkout = Table("active_workout")
     
     // MARK: - Column Definitions - Exercises
     private let id = Expression<Int64>("id")
@@ -54,13 +53,6 @@ final class DatabaseService {
     private let setNumber = Expression<Int>("set_number")
     private let isCompleted = Expression<Bool>("is_completed")
     private let completedAtSet = Expression<Date?>("completed_at")
-    
-    // MARK: - Column Definitions - Active Workout
-    private let currentExerciseIndex = Expression<Int>("current_exercise_index")
-    private let currentSetNumber = Expression<Int>("current_set_number")
-    private let timerEndTime = Expression<Date?>("timer_end_time")
-    private let isTimerRunning = Expression<Bool>("is_timer_running")
-    private let lastSyncedAt = Expression<Date?>("last_synced_at")
     
     // MARK: - Initialization
     private init() {
@@ -159,17 +151,6 @@ final class DatabaseService {
                 t.column(isCompleted, defaultValue: false)
                 t.column(completedAtSet)
                 t.foreignKey(workoutExerciseId, references: workoutExercises, id, delete: .cascade)
-            })
-            
-            // Active Workout table
-            try db.run(activeWorkout.create(ifNotExists: true) { t in
-                t.column(id, primaryKey: .autoincrement)
-                t.column(workoutId)
-                t.column(currentExerciseIndex, defaultValue: 0)
-                t.column(currentSetNumber, defaultValue: 1)
-                t.column(timerEndTime)
-                t.column(isTimerRunning, defaultValue: false)
-                t.column(lastSyncedAt)
             })
             
         } catch {
@@ -1081,74 +1062,6 @@ final class DatabaseService {
             return true
         } catch {
             print("Delete workout set error: \(error)")
-            return false
-        }
-    }
-    
-    // MARK: - Active Workout State CRUD
-    func getActiveWorkoutState() -> ActiveWorkoutState? {
-        guard let db = db else { return nil }
-        
-        do {
-            if let row = try db.pluck(activeWorkout) {
-                return ActiveWorkoutState(
-                    id: row[id],
-                    workoutId: row[workoutId],
-                    currentExerciseIndex: row[currentExerciseIndex],
-                    currentSetNumber: row[currentSetNumber],
-                    timerEndTime: row[timerEndTime],
-                    isTimerRunning: row[isTimerRunning],
-                    lastSyncedAt: row[lastSyncedAt]
-                )
-            }
-        } catch {
-            print("Get active workout state error: \(error)")
-        }
-        
-        return nil
-    }
-    
-    func saveActiveWorkoutState(_ state: ActiveWorkoutState) -> Bool {
-        guard let db = db else { return false }
-        
-        do {
-            // Delete existing state
-            try db.run(activeWorkout.delete())
-            
-            // Insert new state
-            var insert = activeWorkout.insert(
-                currentExerciseIndex <- state.currentExerciseIndex,
-                currentSetNumber <- state.currentSetNumber,
-                timerEndTime <- state.timerEndTime,
-                isTimerRunning <- state.isTimerRunning,
-                lastSyncedAt <- state.lastSyncedAt
-            )
-            if let wId = state.workoutId {
-                insert = activeWorkout.insert(
-                    self.workoutId <- wId,
-                    currentExerciseIndex <- state.currentExerciseIndex,
-                    currentSetNumber <- state.currentSetNumber,
-                    timerEndTime <- state.timerEndTime,
-                    isTimerRunning <- state.isTimerRunning,
-                    lastSyncedAt <- state.lastSyncedAt
-                )
-            }
-            try db.run(insert)
-            return true
-        } catch {
-            print("Save active workout state error: \(error)")
-            return false
-        }
-    }
-    
-    func clearActiveWorkoutState() -> Bool {
-        guard let db = db else { return false }
-        
-        do {
-            try db.run(activeWorkout.delete())
-            return true
-        } catch {
-            print("Clear active workout state error: \(error)")
             return false
         }
     }

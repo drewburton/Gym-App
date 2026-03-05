@@ -13,9 +13,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         NotificationService.shared.requestAuthorization()
         
-        // Initialize Watch Connectivity
-        _ = WatchConnectivityService.shared
-        
         return true
     }
 

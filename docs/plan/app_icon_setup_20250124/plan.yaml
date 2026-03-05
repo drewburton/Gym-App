@@ -1,0 +1,15 @@
+plan_id: app_icon_setup_20250124
+status: in_progress
+tasks:
+  - id: copy_icons
+    description: Copy all icon image files from the source `AppIcons/Assets.xcassets/AppIcon.appiconset/` to the destination `WorkoutTracker-iOS/Resources/Assets.xcassets/AppIcon.appiconset/`.
+    status: in_progress
+    dependencies: []
+  - id: update_contents_json
+    description: Update `WorkoutTracker-iOS/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json` with the correct image mappings and metadata, cleaning up non-standard keys like "folder" and "expected-size" if necessary.
+    status: todo
+    dependencies: [copy_icons]
+  - id: verify_assets
+    description: Verify that all image files referenced in `Contents.json` exist in the destination folder and the structure is valid.
+    status: todo
+    dependencies: [update_contents_json]

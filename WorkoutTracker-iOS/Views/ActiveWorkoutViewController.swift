@@ -10,6 +10,11 @@ class ActiveWorkoutViewController: UIViewController {
     private var setsByExercise: [Int64: [WorkoutSet]] = [:] // Key: Exercise ID
     private var previousSetsByExercise: [Int64: [WorkoutSet]] = [:] // Key: Exercise ID
     private var currentExerciseIndex = 0
+    private var isEditingExercises: Bool = false {
+        didSet {
+            updateEditingState()
+        }
+    }
     
     private let timerLabel: UILabel = {
         let label = UILabel()
@@ -18,14 +23,23 @@ class ActiveWorkoutViewController: UIViewController {
         return label
     }()
 
-    private let finishButton: UIButton = {
+    private let progressLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.textColor = Theme.Colors.secondaryLabel
+        label.textAlignment = .center
+        return label
+    }()
+
+    private lazy var finishButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Finish", for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
         button.backgroundColor = Theme.Colors.success
         button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = Theme.Radius.small
-        button.contentEdgeInsets = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+        button.layer.cornerRadius = 8
+        button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
+        button.addTarget(self, action: #selector(finishTapped), for: .touchUpInside)
         return button
     }()
 
@@ -117,18 +131,25 @@ class ActiveWorkoutViewController: UIViewController {
         setupNavigationBar()
         setupTimerService()
         startTimer()
+        
         updateExerciseUI()
     }
 
     private func setupUI() {
+        view.addSubview(progressLabel)
         view.addSubview(exerciseTitleLabel)
         view.addSubview(restTimerLabel)
         view.addSubview(tableView)
         view.addSubview(previousButton)
         view.addSubview(nextButton)
 
+        progressLabel.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(Theme.Spacing.small)
+            make.centerX.equalToSuperview()
+        }
+
         exerciseTitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(Theme.Spacing.medium)
+            make.top.equalTo(progressLabel.snp.bottom).offset(Theme.Spacing.tiny)
             make.leading.trailing.equalToSuperview().inset(60)
         }
 
@@ -190,14 +211,73 @@ class ActiveWorkoutViewController: UIViewController {
     }
 
     private func setupNavigationBar() {
-        let timerItem = UIBarButtonItem(customView: timerLabel)
+        // Left: Cancel
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelTapped))
+        
+        // Right: Finish and Timer (ungrouped)
         let finishItem = UIBarButtonItem(customView: finishButton)
-        let addExerciseItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addExerciseTapped))
+        let timerItem = UIBarButtonItem(customView: timerLabel)
         
-        navigationItem.rightBarButtonItems = [finishItem, timerItem]
-        navigationItem.leftBarButtonItems = [UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelTapped)), addExerciseItem]
+        if isEditingExercises {
+            navigationItem.rightBarButtonItems = [finishItem]
+        } else {
+            // Arrays are ordered from right-to-left in the navigation bar
+            navigationItem.rightBarButtonItems = [finishItem, timerItem]
+        }
         
-        finishButton.addTarget(self, action: #selector(finishTapped), for: .touchUpInside)
+        // Middle: Add and Edit
+        let middleStack = UIStackView()
+        middleStack.axis = .horizontal
+        middleStack.spacing = 16
+        
+        let addBtn = UIButton(type: .system)
+        addBtn.setImage(UIImage(systemName: "plus.circle"), for: .normal)
+        addBtn.addTarget(self, action: #selector(addExerciseTapped), for: .touchUpInside)
+        
+        let editBtn = UIButton(type: .system)
+        let editIcon = self.isEditingExercises ? "checkmark.circle" : "list.bullet"
+        editBtn.setImage(UIImage(systemName: editIcon), for: .normal)
+        editBtn.addTarget(self, action: #selector(toggleEditingExercises), for: .touchUpInside)
+        
+        middleStack.addArrangedSubview(addBtn)
+        middleStack.addArrangedSubview(editBtn)
+        
+        navigationItem.titleView = middleStack
+    }
+
+    @objc private func toggleEditingExercises() {
+        isEditingExercises.toggle()
+    }
+
+    private func updateEditingState() {
+        tableView.isEditing = isEditingExercises
+        
+        let showSetUI = !isEditingExercises
+        exerciseTitleLabel.isHidden = !showSetUI
+        previousButton.isHidden = !showSetUI
+        nextButton.isHidden = !showSetUI
+        progressLabel.isHidden = !showSetUI
+        
+        if isEditingExercises {
+            restTimerLabel.isHidden = true
+            tableView.tableFooterView = nil
+        } else {
+            // Restore "Add Set" button
+            setupTableView() // Re-setup to add the footer again
+            
+            if exercises.isEmpty {
+                dismiss(animated: true)
+                return
+            }
+            
+            if currentExerciseIndex >= exercises.count {
+                currentExerciseIndex = exercises.count - 1
+            }
+            updateExerciseUI()
+        }
+        
+        setupNavigationBar()
+        tableView.reloadData()
     }
 
     @objc private func addExerciseTapped() {
@@ -233,10 +313,8 @@ class ActiveWorkoutViewController: UIViewController {
         nextButton.alpha = nextButton.isEnabled ? 1.0 : 0.3
         
         tableView.reloadData()
-        title = "Exercise \(currentExerciseIndex + 1) of \(exercises.count)"
-        
-        // Sync with Watch
-        WatchConnectivityService.shared.sendActiveWorkoutState(["currentExerciseName": exercise.name])
+        progressLabel.text = "Exercise \(currentExerciseIndex + 1) of \(exercises.count)"
+        title = "" // Clear title since we use titleView
     }
 
     @objc private func previousExercise() {
@@ -365,14 +443,27 @@ extension ActiveWorkoutViewController: ExercisePickerDelegate {
 
 extension ActiveWorkoutViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if isEditingExercises {
+            return exercises.count
+        }
+        
+        guard currentExerciseIndex < exercises.count else { return 0 }
         let exercise = exercises[currentExerciseIndex]
         let exerciseId = exercise.id ?? Int64(currentExerciseIndex)
         return setsByExercise[exerciseId]?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if isEditingExercises {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ExerciseEditCell") ?? UITableViewCell(style: .default, reuseIdentifier: "ExerciseEditCell")
+            cell.textLabel?.text = exercises[indexPath.row].name
+            cell.showsReorderControl = true
+            return cell
+        }
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: WorkoutSetCell.reuseIdentifier, for: indexPath) as! WorkoutSetCell
         
+        guard currentExerciseIndex < exercises.count else { return cell }
         let exercise = exercises[currentExerciseIndex]
         let exerciseId = exercise.id ?? Int64(currentExerciseIndex)
         
@@ -402,6 +493,48 @@ extension ActiveWorkoutViewController: UITableViewDelegate, UITableViewDataSourc
         }
         
         return cell
+    }
+
+    func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+        return isEditingExercises
+    }
+
+    func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        let movedExercise = exercises.remove(at: sourceIndexPath.row)
+        exercises.insert(movedExercise, at: destinationIndexPath.row)
+        
+        let movedWorkoutExercise = workoutExercises.remove(at: sourceIndexPath.row)
+        workoutExercises.insert(movedWorkoutExercise, at: destinationIndexPath.row)
+        
+        // Update currentExerciseIndex to follow the exercise being moved if it was current
+        if currentExerciseIndex == sourceIndexPath.row {
+            currentExerciseIndex = destinationIndexPath.row
+        } else if sourceIndexPath.row < currentExerciseIndex && destinationIndexPath.row >= currentExerciseIndex {
+            currentExerciseIndex -= 1
+        } else if sourceIndexPath.row > currentExerciseIndex && destinationIndexPath.row <= currentExerciseIndex {
+            currentExerciseIndex += 1
+        }
+    }
+
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            exercises.remove(at: indexPath.row)
+            workoutExercises.remove(at: indexPath.row)
+            
+            if exercises.isEmpty {
+                toggleEditingExercises()
+                dismiss(animated: true)
+                return
+            }
+            
+            if currentExerciseIndex >= exercises.count {
+                currentExerciseIndex = exercises.count - 1
+            } else if indexPath.row < currentExerciseIndex {
+                currentExerciseIndex -= 1
+            }
+            
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        }
     }
 
     @objc private func setCompleteTapped(_ sender: UIButton) {
@@ -465,3 +598,4 @@ extension ActiveWorkoutViewController: UITableViewDelegate, UITableViewDataSourc
         setsByExercise[exerciseId] = sets
     }
 }
+

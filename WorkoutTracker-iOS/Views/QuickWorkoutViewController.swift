@@ -66,7 +66,12 @@ class QuickWorkoutViewController: UIViewController {
 
     private func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelTapped))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add Exercise", style: .plain, target: self, action: #selector(addExerciseTapped))
+        
+        let addAction = UIAction(title: "Add Exercise", image: UIImage(systemName: "plus")) { [weak self] _ in
+            self?.addExerciseTapped()
+        }
+        let menu = UIMenu(children: [addAction])
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "plus.circle"), menu: menu)
     }
 
     private func updateStartButtonState() {

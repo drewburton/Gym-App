@@ -34,20 +34,14 @@ class ExercisesListViewController: UIViewController {
     }
 
     private func setupNavigationBar() {
-        let filterButton = UIBarButtonItem(
-            image: UIImage(systemName: "line.3.horizontal.decrease.circle"),
-            style: .plain,
-            target: self,
-            action: #selector(filterButtonTapped)
-        )
-        
-        let addButton = UIBarButtonItem(
-            barButtonSystemItem: .add,
-            target: self,
-            action: #selector(addButtonTapped)
-        )
-        
-        navigationItem.rightBarButtonItems = [addButton, filterButton]
+        let addAction = UIAction(title: "Add Exercise", image: UIImage(systemName: "plus")) { [weak self] _ in
+            self?.addButtonTapped()
+        }
+        let filterAction = UIAction(title: "Filter", image: UIImage(systemName: "line.3.horizontal.decrease.circle")) { [weak self] _ in
+            self?.filterButtonTapped()
+        }
+        let menu = UIMenu(children: [addAction, filterAction])
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "plus.circle"), menu: menu)
     }
 
     @objc private func addButtonTapped() {

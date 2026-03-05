@@ -3,7 +3,6 @@ options:
   bundleIdPrefix: com.workouttracker
   deploymentTarget:
     iOS: "18.0"
-    watchOS: "11.0"
   xcodeVersion: "15.0"
   generateEmptyDirectories: true
 
@@ -12,7 +11,6 @@ settings:
     SWIFT_VERSION: "5.9"
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
-    DEVELOPMENT_TEAM: ""
 
 packages:
   SQLite:
@@ -31,17 +29,13 @@ targets:
       - path: WorkoutTracker-iOS
         excludes:
           - "**/.DS_Store"
-      - path: Shared
-        excludes:
-          - "**/.DS_Store"
     settings:
       base:
         INFOPLIST_FILE: WorkoutTracker-iOS/App/Info.plist
-        PRODUCT_BUNDLE_IDENTIFIER: com.workouttracker.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.drewburton.workouttracker
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: ""
         UIApplicationShortcutItems:
           - UIApplicationShortcutItemTitle: "Start Workout"
             UIApplicationShortcutItemType: "StartWorkoutAction"
@@ -54,49 +48,11 @@ targets:
         product: SQLite
       - package: SnapKit
 
-  WorkoutTracker-Watch:
-    type: application
-    platform: watchOS
-    deploymentTarget: "11.0"
-    sources:
-      - path: WorkoutTracker-Watch
-        excludes:
-          - "**/.DS_Store"
-      - path: Shared
-        excludes:
-          - "**/.DS_Store"
-    settings:
-      base:
-        INFOPLIST_FILE: WorkoutTracker-Watch/Info.plist
-        PRODUCT_BUNDLE_IDENTIFIER: com.workouttracker.app.watchkitapp
-        WATCHOS_DEPLOYMENT_TARGET: "11.0"
-        CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: ""
-        ASSETCATALOG_COMPILER_WATCH_APP_ICON_NAME: AppIcon
-        TARGETED_DEVICE_FAMILY: "4"
-    dependencies:
-      - sdk: WatchKit.framework
-
 schemes:
   WorkoutTracker-iOS:
     build:
       targets:
         WorkoutTracker-iOS: all
-    run:
-      config: Debug
-    test:
-      config: Debug
-    profile:
-      config: Release
-    analyze:
-      config: Debug
-    archive:
-      config: Release
-
-  WorkoutTracker-Watch:
-    build:
-      targets:
-        WorkoutTracker-Watch: all
     run:
       config: Debug
     test:

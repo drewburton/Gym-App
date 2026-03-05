@@ -1,0 +1,29 @@
+plan_id: workout_tracker_fixes_20250124
+name: Workout Tracker Fixes and Enhancements
+status: in_progress
+tasks:
+  - id: research_current_state
+    description: Research current implementation of active workouts, templates, and WatchConnectivity.
+    status: completed
+  - id: implement_template_deletion
+    description: Add a "Delete Template" button to TemplateEditorViewController.
+    status: completed
+  - id: implement_exercise_management_during_workout
+    description: Add capability for deleting and reordering exercises during an active workout in ActiveWorkoutViewController.
+    status: completed
+  - id: fix_watch_connectivity_initialization
+    description: Initialize activeWorkoutData from receivedApplicationContext in WatchConnectivityService.
+    status: completed
+  - id: implement_workout_finish_sync
+    description: Send a "workout finished" signal to the Watch when a workout is completed on the iPhone.
+    status: completed
+  - id: reformat_active_workout_header
+    description: Reformat the controls at the top of ActiveWorkoutViewController to move Finish to the right, Cancel to the left, Add and Edit buttons to the middle, and "Exercise x of y" text below.
+    status: completed
+    details:
+      - Add progressLabel (UILabel) to show "Exercise x of y".
+      - Add addButton and editButton (UIButton) for the navigation bar titleView.
+      - Update setupUI to place progressLabel at the top of the content area.
+      - Update setupNavigationBar to use Cancel (left), titleView with Add/Edit (middle), and Finish (right).
+      - Update updateExerciseUI to update progressLabel instead of navigation title.
+      - Remove the old ellipsis menu.

@@ -1,0 +1,76 @@
+name: "Workout Tracker Enhancements - Jan 2025"
+plan_id: "workout_tracker_enhancements_20250124"
+objective: "Add template deletion, exercise reordering/deletion in active workouts, and improve WatchConnectivity synchronization."
+tl_dr: "Enhancing the core workout and template management experience with deletion and reordering capabilities, while improving reliable syncing between iPhone and Watch."
+open_questions:
+  - "Should deleting a template also delete the associated workout history? (Currently assumes no, as per DatabaseService design)."
+  - "In ActiveWorkoutViewController, if the user deletes the currently active exercise, which exercise should become active? (The plan assumes the next one, or the previous one if it was the last one)."
+
+tasks:
+  - task_id: "task-001"
+    name: "Add Delete Template to TemplateEditorViewController"
+    description: "Add a 'Delete Template' button at the bottom of the TemplateEditorViewController. The button should only be visible for existing templates. It should trigger a confirmation alert before calling DatabaseService.shared.deleteTemplate()."
+    priority: "medium"
+    status: "todo"
+    dependencies: []
+    file_path: "WorkoutTracker-iOS/Views/TemplateEditorViewController.swift"
+    failure_modes:
+      - likelihood: "low"
+        impact: "medium"
+        mitigation: "Ensure the 'Delete Template' button is only shown when 'template' is not nil (i.e., we are editing an existing template, not creating a new one)."
+
+  - task_id: "task-002"
+    name: "Implement ViewMode toggle in ActiveWorkoutViewController"
+    description: "Introduce a 'ViewMode' enum (sets, exerciseList) and add a navigation bar button to toggle between viewing the current exercise's sets and the full list of exercises in the workout."
+    priority: "high"
+    status: "todo"
+    dependencies: []
+    file_path: "WorkoutTracker-iOS/Views/ActiveWorkoutViewController.swift"
+    failure_modes:
+      - likelihood: "medium"
+        impact: "high"
+        mitigation: "Carefully manage the UITableView dataSource and delegate methods to switch their logic based on the current ViewMode. Ensure the table reloads correctly when switching."
+
+  - task_id: "task-003"
+    name: "Implement Exercise Reordering and Deletion in ActiveWorkoutViewController"
+    description: "In 'exerciseList' mode, enable reordering and deletion of exercises. Moving an exercise should update the 'exercises' array and the 'sortOrder' of the corresponding 'WorkoutExercise'. Deleting an exercise should remove it from all relevant local storage arrays and maps (exercises, workoutExercises, setsByExercise)."
+    priority: "high"
+    status: "todo"
+    dependencies: ["task-002"]
+    file_path: "WorkoutTracker-iOS/Views/ActiveWorkoutViewController.swift"
+    failure_modes:
+      - likelihood: "medium"
+        impact: "high"
+        mitigation: "Ensure that 'currentExerciseIndex' is updated if the currently viewed exercise is moved or deleted, preventing an out-of-bounds crash or showing the wrong data when switching back to 'sets' mode."
+
+  - task_id: "task-004"
+    name: "Update WatchConnectivity on iOS for Completion"
+    description: "In ActiveWorkoutViewController's 'finishTapped' method, send a message to the Watch indicating that the workout has finished, allowing the Watch app to reset its state."
+    priority: "medium"
+    status: "todo"
+    dependencies: ["task-003"]
+    file_path: "WorkoutTracker-iOS/Views/ActiveWorkoutViewController.swift"
+    failure_modes:
+      - likelihood: "low"
+        impact: "low"
+        mitigation: "Check if WCSession is reachable or use updateApplicationContext to ensure the message is delivered even if the app is in the background."
+
+  - task_id: "task-005"
+    name: "Improve WatchConnectivity Initialization and Completion on Watch"
+    description: "On the Watch, ensure that 'activeWorkoutData' is initialized from 'session.receivedApplicationContext' upon activation. Also, handle the 'workout finished' message by clearing 'activeWorkoutData', which will return the user to the 'No active workout' screen."
+    priority: "medium"
+    status: "todo"
+    dependencies: ["task-004"]
+    file_path: "WorkoutTracker-Watch/WatchConnectivityService.swift"
+    failure_modes:
+      - likelihood: "low"
+        impact: "medium"
+        mitigation: "Perform UI updates on the main thread when receiving messages from WCSession."
+
+  - task_id: "task-006"
+    name: "Final Verification and Manual Testing"
+    description: "Verify template deletion, exercise reordering/deletion during a workout, and end-to-end sync with the Apple Watch (initialization and completion)."
+    priority: "high"
+    status: "todo"
+    dependencies: ["task-001", "task-005"]
+    file_path: ""

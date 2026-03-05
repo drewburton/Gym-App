@@ -8,6 +8,7 @@ protocol Coordinator: AnyObject {
 class AppCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     private var window: UIWindow
+    private var mainTabBarController: MainTabBarController?
     
     init(window: UIWindow) {
         self.window = window
@@ -15,6 +16,7 @@ class AppCoordinator: Coordinator {
     
     func start() {
         let tabBarController = MainTabBarController()
+        self.mainTabBarController = tabBarController
         window.rootViewController = tabBarController
         window.makeKeyAndVisible()
     }

@@ -1,0 +1,28 @@
+name: "Watch Workout Sync Improvement"
+plan_id: "watch_workout_sync_20250124"
+objective: "Improve synchronization between iPhone and Watch using updateApplicationContext and explicit workout active state."
+tl_dr: "Updating WatchConnectivityService to prioritize applicationContext and adding isWorkoutActive flag for immediate view transitions on Watch."
+tasks:
+  - task_id: "task-001"
+    name: "Update iOS WatchConnectivityService"
+    description: "Update sendActiveWorkoutState in WorkoutTracker-iOS/Services/WatchConnectivityService.swift to use updateApplicationContext as the primary sync method, while also using sendMessage for immediate updates when reachable."
+    priority: "high"
+    status: "completed"
+    dependencies: []
+    file_path: "WorkoutTracker-iOS/Services/WatchConnectivityService.swift"
+
+  - task_id: "task-002"
+    name: "Update Watch WatchConnectivityService"
+    description: "Update processIncomingData in WorkoutTracker-Watch/WatchConnectivityService.swift to handle isWorkoutActive and ensure state is correctly updated from applicationContext."
+    priority: "high"
+    status: "completed"
+    dependencies: ["task-001"]
+    file_path: "WorkoutTracker-Watch/WatchConnectivityService.swift"
+
+  - task_id: "task-003"
+    name: "Trigger initial workout state on iOS"
+    description: "Update ActiveWorkoutViewController.swift to include isWorkoutActive: true in the workout state sent to the Watch, especially during initial load and exercise updates."
+    priority: "high"
+    status: "in_progress"
+    dependencies: ["task-002"]
+    file_path: "WorkoutTracker-iOS/Views/ActiveWorkoutViewController.swift"

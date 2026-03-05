@@ -20,6 +20,14 @@ class TemplateEditorViewController: UIViewController {
     
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     
+    private let deleteButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Delete Template", for: .normal)
+        button.setTitleColor(.systemRed, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+        return button
+    }()
+    
     init(template: WorkoutTemplate? = nil) {
         self.template = template
         super.init(nibName: nil, bundle: nil)
@@ -49,9 +57,25 @@ class TemplateEditorViewController: UIViewController {
             make.height.equalTo(44)
         }
 
-        tableView.snp.makeConstraints { make in
-            make.top.equalTo(nameTextField.snp.bottom).offset(20)
-            make.leading.trailing.bottom.equalToSuperview()
+        if template != nil {
+            view.addSubview(deleteButton)
+            deleteButton.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
+            deleteButton.snp.makeConstraints { make in
+                make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+                make.leading.trailing.equalToSuperview().inset(20)
+                make.height.equalTo(50)
+            }
+            
+            tableView.snp.makeConstraints { make in
+                make.top.equalTo(nameTextField.snp.bottom).offset(20)
+                make.leading.trailing.equalToSuperview()
+                make.bottom.equalTo(deleteButton.snp.top).offset(-10)
+            }
+        } else {
+            tableView.snp.makeConstraints { make in
+                make.top.equalTo(nameTextField.snp.bottom).offset(20)
+                make.leading.trailing.bottom.equalToSuperview()
+            }
         }
     }
 
@@ -64,10 +88,15 @@ class TemplateEditorViewController: UIViewController {
 
     private func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelTapped))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(saveTapped))
         
-        let addExerciseButton = UIBarButtonItem(title: "Add Exercise", style: .plain, target: self, action: #selector(addExerciseTapped))
-        navigationItem.setRightBarButtonItems([navigationItem.rightBarButtonItem!, addExerciseButton], animated: false)
+        let saveAction = UIAction(title: "Save", image: UIImage(systemName: "checkmark")) { [weak self] _ in
+            self?.saveTapped()
+        }
+        let addAction = UIAction(title: "Add Exercise", image: UIImage(systemName: "plus")) { [weak self] _ in
+            self?.addExerciseTapped()
+        }
+        let menu = UIMenu(children: [saveAction, addAction])
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), menu: menu)
     }
 
     private func fetchExercises() {
@@ -91,6 +120,36 @@ class TemplateEditorViewController: UIViewController {
         pickerVC.delegate = self
         let nav = UINavigationController(rootViewController: pickerVC)
         present(nav, animated: true)
+    }
+
+    @objc private func deleteTapped() {
+        let alert = UIAlertController(
+            title: "Delete Template",
+            message: "Are you sure you want to delete this template? This action cannot be undone.",
+            preferredStyle: .actionSheet
+        )
+        
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
+            self?.performDeletion()
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        // For iPad support
+        if let popoverController = alert.popoverPresentationController {
+            popoverController.sourceView = deleteButton
+            popoverController.sourceRect = deleteButton.bounds
+        }
+        
+        present(alert, animated: true)
+    }
+
+    private func performDeletion() {
+        guard let id = template?.id else { return }
+        if DatabaseService.shared.deleteTemplate(id) {
+            delegate?.didSaveTemplate()
+            dismiss(animated: true)
+        }
     }
 
     @objc private func saveTapped() {
