@@ -5,7 +5,7 @@ A powerful, native iOS and watchOS application designed for seamless gym workout
 ![iOS 18.0+](https://img.shields.io/badge/iOS-18.0%2B-blue?style=flat-square&logo=apple)
 ![watchOS 11.0+](https://img.shields.io/badge/watchOS-11.0%2B-orange?style=flat-square&logo=apple)
 ![Swift 5.9](https://img.shields.io/badge/Swift-5.9-F05138?style=flat-square&logo=swift)
-![Status](https://img.shields.io/badge/Status-Phase%205%20In%20Progress-green?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Phase%206%20Completed-green?style=flat-square)
 
 ---
 
@@ -113,8 +113,9 @@ The project is organized into modular components to support cross-platform funct
 - [x] **Phase 2:** iPhone Core UI (Tabs, Home, Exercises, Templates)
 - [x] **Phase 3:** Active Workout & Timer Service
 - [x] **Phase 4:** History & PR Tracking
-- [ ] **Phase 5:** Apple Watch Companion (**In Progress**)
+- [ ] **Phase 5:** Apple Watch Companion (**Cancelled — blocked by limitations of a free Apple Developer account**)
 - [x] **Phase 6:** UI Polish, Haptics, and Accessibility
+
 
 ---
 

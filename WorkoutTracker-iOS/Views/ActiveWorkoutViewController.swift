@@ -517,22 +517,58 @@ extension ActiveWorkoutViewController: UITableViewDelegate, UITableViewDataSourc
     }
 
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
+        if editingStyle != .delete { return }
+
+        // If we're in exercise-editing mode, deleting removes an exercise
+        if isEditingExercises {
             exercises.remove(at: indexPath.row)
             workoutExercises.remove(at: indexPath.row)
-            
+
             if exercises.isEmpty {
                 toggleEditingExercises()
                 dismiss(animated: true)
                 return
             }
-            
+
             if currentExerciseIndex >= exercises.count {
                 currentExerciseIndex = exercises.count - 1
             } else if indexPath.row < currentExerciseIndex {
                 currentExerciseIndex -= 1
             }
-            
+
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            return
+        }
+
+        // Otherwise, treat the deletion as removing a set for the current exercise
+        guard currentExerciseIndex < exercises.count else { return }
+        let exercise = exercises[currentExerciseIndex]
+        let exerciseId = exercise.id ?? Int64(currentExerciseIndex)
+        guard var sets = setsByExercise[exerciseId], indexPath.row < sets.count else { return }
+
+        let removedSet = sets.remove(at: indexPath.row)
+
+        // If this set was already persisted, delete it from DB
+        if let setId = removedSet.id {
+            _ = DatabaseService.shared.deleteWorkoutSet(setId)
+        }
+
+        // Renumber remaining sets and persist updates for those with ids
+        for i in 0..<sets.count {
+            sets[i].setNumber = i + 1
+            if sets[i].id != nil {
+                _ = DatabaseService.shared.updateWorkoutSet(sets[i])
+            }
+        }
+
+        setsByExercise[exerciseId] = sets
+
+        if sets.isEmpty {
+            // Keep the UI consistent by leaving one empty set
+            let newSet = WorkoutSet(workoutExerciseId: 0, setNumber: 1, weight: 0, reps: 0)
+            setsByExercise[exerciseId] = [newSet]
+            tableView.reloadData()
+        } else {
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }

@@ -63,4 +63,8 @@ Package.resolved
 *.key
 *.cert
 *.pfx
+# Local docs not meant for source control
+ipa-creation.md
 *.pem
+# Local instructions for manual DB backup/restore
+BACKUP_RESTORE_DATABASE.md
